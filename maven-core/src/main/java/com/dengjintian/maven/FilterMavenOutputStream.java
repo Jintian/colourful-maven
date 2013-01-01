@@ -1,4 +1,4 @@
-package maven;
+package com.dengjintian.maven;
 
 import org.fusesource.jansi.Ansi;
 

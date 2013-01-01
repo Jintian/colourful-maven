@@ -19,7 +19,7 @@ package org.apache.maven.cli;
  * under the License.
  */
 
-import maven.FilterMavenOutputStream;
+import com.dengjintian.maven.FilterMavenOutputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.maven.Maven;
