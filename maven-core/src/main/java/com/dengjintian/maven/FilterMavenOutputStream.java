@@ -12,9 +12,9 @@ import java.io.OutputStream;
  */
 public class FilterMavenOutputStream extends FilterOutputStream {
 
-    int    buffer_size = 1024;
-    byte[] buffer      = new byte[buffer_size];
-    int    index       = 0;
+    private static int    buffer_size = 1024;
+    private static byte[] buffer      = new byte[buffer_size];
+    private static int    index       = 0;
 
     public FilterMavenOutputStream(OutputStream outputStream){
         super(outputStream);
@@ -23,15 +23,10 @@ public class FilterMavenOutputStream extends FilterOutputStream {
     public void write(int i) throws IOException {
 
         if (i == '\n' || i == '\r') {
+            // wait until we get the whole line
             buffer[index++] = (byte) i;
-            String tmp = new String(buffer);
-            if (tmp.contains("INFO")) {
-                out.write(Ansi.ansi().fg(Ansi.Color.BLUE).a(tmp).toString().getBytes());
-                out.write(Ansi.ansi().reset().toString().getBytes());
-            } else {
-                out.write((tmp).getBytes());
-            }
-
+            String line = new String(buffer);
+            out.write(getColourfulByte(line));
             resetBuffer();
         } else {
             buffer[index++] = (byte) i;
@@ -41,9 +36,30 @@ public class FilterMavenOutputStream extends FilterOutputStream {
         }
     }
 
+    private byte[] getColourfulByte(String tmp) {
+        Ansi ansi = Ansi.ansi();
+        if (tmp.startsWith("[INFO] ----")) {
+            return ansi.fg(Ansi.Color.BLUE).bold().a(tmp).toString().getBytes();
+        } else if (tmp.startsWith("[INFO] [")) {
+            byte[] result = ansi.reset().fg(Ansi.Color.CYAN).bold().a(tmp).reset().toString().getBytes();
+            return result;
+        } else if (tmp.startsWith("[INFO] BUILD SUCCESSFUL")) {
+            byte[] result = ansi.reset().fg(Ansi.Color.GREEN).bold().a(tmp).reset().toString().getBytes();
+            return result;
+        } else if (tmp.startsWith("[WARNING]")) {
+            byte[] result = ansi.reset().fg(Ansi.Color.YELLOW).bold().a(tmp).reset().toString().getBytes();
+            return result;
+        } else if (tmp.startsWith("[ERROR]")) {
+            byte[] result = ansi.reset().fg(Ansi.Color.RED).bold().a(tmp).reset().toString().getBytes();
+            return result;
+        } else {
+            return tmp.getBytes();
+        }
+    }
+
     private void resetBuffer() {
         buffer_size = 1024;
-        index=0;
+        index = 0;
         buffer = new byte[buffer_size];
     }
 
