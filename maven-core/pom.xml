@@ -30,6 +30,10 @@
   <name>Maven Core</name>
 
   <dependencies>
+      <dependency>
+          <groupId>org.fusesource.jansi</groupId>
+          <artifactId>jansi</artifactId>
+      </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-settings</artifactId>

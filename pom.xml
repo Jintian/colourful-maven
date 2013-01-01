@@ -481,6 +481,11 @@ under the License.
         <artifactId>classworlds</artifactId>
         <version>1.1</version>
       </dependency>
+      <dependency>
+        <groupId>org.fusesource.jansi</groupId>
+        <artifactId>jansi</artifactId>
+        <version>1.9</version>
+      </dependency>
     </dependencies>
     <!--start-->
   </dependencyManagement>

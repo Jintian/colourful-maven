@@ -19,18 +19,7 @@ package org.apache.maven.cli;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Map.Entry;
-
+import maven.FilterMavenOutputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.maven.Maven;
@@ -66,11 +55,20 @@ import org.codehaus.plexus.util.Os;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.fusesource.jansi.AnsiConsole;
 import org.sonatype.plexus.components.cipher.DefaultPlexusCipher;
 import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecUtil;
 import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -107,6 +105,10 @@ public class MavenCli
      */
     public static int main( String[] args, ClassWorld classWorld )
     {
+        AnsiConsole.systemInstall();
+        PrintStream myStream=new PrintStream(new FilterMavenOutputStream(System.out));
+        System.setOut(myStream);
+
         // ----------------------------------------------------------------------
         // Setup the command line parser
         // ----------------------------------------------------------------------
@@ -378,6 +380,7 @@ public class MavenCli
             }
         }
 
+        AnsiConsole.systemUninstall();
         return 0;
     }
 
