@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Before content are sent to ansi, we do some extra filters here. <br />
+ * Before content are sent to ansi, we do some extra filtering here. <br />
  * User: jintian, Date: 31/12/12
  */
 public class FilterMavenOutputStream extends FilterOutputStream {
@@ -37,24 +37,32 @@ public class FilterMavenOutputStream extends FilterOutputStream {
     }
 
     private byte[] getColourfulByte(String tmp) {
-        Ansi ansi = Ansi.ansi();
-        if (tmp.startsWith("[INFO] ----")) {
-            return ansi.fg(Ansi.Color.BLUE).bold().a(tmp).toString().getBytes();
+        Ansi ansi = Ansi.ansi().reset();
+        if (tmp.startsWith("[INFO] -------") || (tmp.startsWith("[INFO] Building") && !tmp.contains(":"))
+            || tmp.startsWith("[INFO]    task-segment") || tmp.startsWith("[INFO] Total time:")
+            || tmp.startsWith("[INFO] Finished at:") || tmp.startsWith("[INFO] Final Memory:")) {
+            ansi.fgBright(Ansi.Color.MAGENTA);
         } else if (tmp.startsWith("[INFO] [")) {
-            byte[] result = ansi.reset().fg(Ansi.Color.CYAN).bold().a(tmp).reset().toString().getBytes();
-            return result;
+            ansi.fg(Ansi.Color.CYAN).bold();
         } else if (tmp.startsWith("[INFO] BUILD SUCCESSFUL")) {
-            byte[] result = ansi.reset().fg(Ansi.Color.GREEN).bold().a(tmp).reset().toString().getBytes();
-            return result;
+            ansi.fgBright(Ansi.Color.GREEN).bold();
         } else if (tmp.startsWith("[WARNING]")) {
-            byte[] result = ansi.reset().fg(Ansi.Color.YELLOW).bold().a(tmp).reset().toString().getBytes();
-            return result;
+            ansi.fgBright(Ansi.Color.YELLOW).bold();
         } else if (tmp.startsWith("[ERROR]")) {
-            byte[] result = ansi.reset().fg(Ansi.Color.RED).bold().a(tmp).reset().toString().getBytes();
-            return result;
-        } else {
-            return tmp.getBytes();
+            ansi.fgBright(Ansi.Color.RED).bold();
+        } else if (tmp.startsWith("Tests run:")) {
+            String[] tokens = tmp.split(":|,");
+            if (tokens.length == 8) {
+                // be conservative
+                ansi.fg(Ansi.Color.GREEN).a(tokens[0] + ":" + tokens[1]).reset().a(",");
+                ansi.fg(Ansi.Color.GREEN).a(tokens[2] + ":").fg(Ansi.Color.RED).bold().a(tokens[3]).reset().a(",").reset();
+                ansi.fg(Ansi.Color.GREEN).a(tokens[4] + ":").fg(Ansi.Color.RED).bold().a(tokens[5]).reset().a(",").reset();
+                ansi.fg(Ansi.Color.GREEN).a(tokens[6] + ":").fg(Ansi.Color.YELLOW).bold().a(tokens[7]).reset();
+                tmp = "";
+            }
         }
+        ansi.a(tmp).reset();
+        return ansi.toString().getBytes();
     }
 
     private void resetBuffer() {
