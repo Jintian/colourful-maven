@@ -26,7 +26,7 @@ public class FilterMavenOutputStream extends FilterOutputStream {
             // wait until we get the whole line
             buffer[index++] = (byte) i;
             String line = new String(buffer);
-            out.write(getColourfulByte(line));
+            out.write(getColourfulByteForLine(line));
             resetBuffer();
         } else {
             buffer[index++] = (byte) i;
@@ -36,32 +36,32 @@ public class FilterMavenOutputStream extends FilterOutputStream {
         }
     }
 
-    private byte[] getColourfulByte(String tmp) {
+    private byte[] getColourfulByteForLine(String line) {
         Ansi ansi = Ansi.ansi().reset();
-        if (tmp.startsWith("[INFO] -------") || (tmp.startsWith("[INFO] Building") && !tmp.contains(":"))
-            || tmp.startsWith("[INFO]    task-segment") || tmp.startsWith("[INFO] Total time:")
-            || tmp.startsWith("[INFO] Finished at:") || tmp.startsWith("[INFO] Final Memory:")) {
+        if (line.startsWith("[INFO] -------") || (line.startsWith("[INFO] Building") && !line.contains(":"))
+            || line.startsWith("[INFO]    task-segment") || line.startsWith("[INFO] Total time:")
+            || line.startsWith("[INFO] Finished at:") || line.startsWith("[INFO] Final Memory:")) {
             ansi.fgBright(Ansi.Color.MAGENTA);
-        } else if (tmp.startsWith("[INFO] [")) {
+        } else if (line.startsWith("[INFO] [")) {
             ansi.fg(Ansi.Color.CYAN).bold();
-        } else if (tmp.startsWith("[INFO] BUILD SUCCESSFUL")) {
+        } else if (line.startsWith("[INFO] BUILD SUCCESSFUL")) {
             ansi.fgBright(Ansi.Color.GREEN).bold();
-        } else if (tmp.startsWith("[WARNING]")) {
+        } else if (line.startsWith("[WARNING]")) {
             ansi.fgBright(Ansi.Color.YELLOW).bold();
-        } else if (tmp.startsWith("[ERROR]")) {
+        } else if (line.startsWith("[ERROR]")) {
             ansi.fgBright(Ansi.Color.RED).bold();
-        } else if (tmp.startsWith("Tests run:")) {
-            String[] tokens = tmp.split(":|,");
+        } else if (line.startsWith("Tests run:")) {
+            String[] tokens = line.split(":|,");
             if (tokens.length == 8) {
                 // be conservative
                 ansi.fg(Ansi.Color.GREEN).a(tokens[0] + ":" + tokens[1]).reset().a(",");
                 ansi.fg(Ansi.Color.GREEN).a(tokens[2] + ":").fg(Ansi.Color.RED).bold().a(tokens[3]).reset().a(",").reset();
                 ansi.fg(Ansi.Color.GREEN).a(tokens[4] + ":").fg(Ansi.Color.RED).bold().a(tokens[5]).reset().a(",").reset();
                 ansi.fg(Ansi.Color.GREEN).a(tokens[6] + ":").fg(Ansi.Color.YELLOW).bold().a(tokens[7]).reset();
-                tmp = "";
+                line = "";
             }
         }
-        ansi.a(tmp).reset();
+        ansi.a(line).reset();
         return ansi.toString().getBytes();
     }
 

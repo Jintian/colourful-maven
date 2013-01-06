@@ -108,6 +108,7 @@ public class MavenCli
         AnsiConsole.systemInstall();
         PrintStream myStream=new PrintStream(new FilterMavenOutputStream(System.out));
         System.setOut(myStream);
+        System.setErr(myStream);
 
         // ----------------------------------------------------------------------
         // Setup the command line parser
